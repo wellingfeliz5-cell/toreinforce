@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Essential English Vocabulary</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --accent: #4f46e5;
+      --accent-hover: #4338ca;
+      --text: #0f172a;
+      --text-secondary: #64748b;
+      --correct: #10b981;
+      --correct-bg: #ecfdf5;
+      --wrong: #ef4444;
+      --wrong-bg: #fef2f2;
+      --border: #e2e8f0;
+      --timer-bg: #fee2e2;
+      --timer-text: #dc2626;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      background-color: var(--card-bg);
+      width: 100%;
+      max-width: 550px;
+      border-radius: 20px;
+      padding: 32px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+      border: 1px solid var(--border);
+    }
+
+    .screen {
+      display: none;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      text-align: center;
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    p.subtitle {
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
+    /* Selector de Preguntas */
+    .selector-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      margin: 20px 0;
+    }
+
+    .stepper {
+      display: flex;
+      align-items: center;
+      background-color: #f1f5f9;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .stepper button {
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-size: 1.5rem;
+      width: 50px;
+      height: 50px;
+      cursor: pointer;
+      transition: background 0.2s;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    @media (hover: hover) {
+      .stepper button:hover {
+        background-color: #e2e8f0;
+      }
+    }
+
+    .stepper span {
+      font-size: 1.4rem;
+      font-weight: 600;
+      width: 70px;
+      text-align: center;
+    }
+
+    /* Botones generales */
+    .btn-primary {
+      background-color: var(--accent);
+      color: white;
+      border: none;
+      padding: 14px 20px;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      width: 100%;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    @media (hover: hover) {
+      .btn-primary:hover {
+        background-color: var(--accent-hover);
+      }
+    }
+
+    .btn-danger {
+      background-color: #fef2f2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    @media (hover: hover) {
+      .btn-danger:hover {
+        background-color: #fee2e2;
+        color: #b91c1c;
+      }
+    }
+
+    /* Interfaz de Juego */
+    .game-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 14px;
+    }
+
+    .progress {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    .timer-badge {
+      background-color: var(--timer-bg);
+      color: var(--timer-text);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      border: 1px solid #fca5a5;
+    }
+
+    .word-box {
+      text-align: center;
+      padding: 24px 10px;
+      background-color: #f8fafc;
+      border-radius: 12px;
+      border: 1px dashed var(--border);
+    }
+
+    .phrasal-verb {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: var(--accent);
+      letter-spacing: -0.5px;
+    }
+
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .option-btn {
+      background-color: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      color: var(--text);
+      font-size: 0.95rem;
+      font-weight: 500;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+      -webkit-tap-highlight-color: transparent;
+      outline: none;
+      touch-action: manipulation;
+    }
+
+    @media (hover: hover) {
+      .option-btn:hover:not(:disabled) {
+        border-color: var(--accent);
+        background-color: #f5f3ff;
+      }
+    }
+
+    .option-btn .label {
+      font-weight: 700;
+      color: var(--accent);
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      background-color: #f1f5f9;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+
+    .option-btn.correct {
+      background-color: var(--correct-bg) !important;
+      border-color: var(--correct) !important;
+      color: #065f46 !important;
+      font-weight: 600;
+    }
+
+    .option-btn.correct .label {
+      background-color: var(--correct);
+      color: white;
+    }
+
+    .option-btn.wrong {
+      background-color: var(--wrong-bg) !important;
+      border-color: var(--wrong) !important;
+      color: #991b1b !important;
+      font-weight: 600;
+    }
+
+    .option-btn.wrong .label {
+      background-color: var(--wrong);
+      color: white;
+    }
+
+    .option-btn.blink-red {
+      animation: blinkRed 0.6s ease-in-out 2;
+    }
+
+    @keyframes blinkRed {
+      0%, 100% {
+        background-color: #ffffff;
+        border-color: var(--border);
+        color: var(--text);
+      }
+      50% {
+        background-color: var(--wrong-bg);
+        border-color: var(--wrong);
+        color: #991b1b;
+      }
+    }
+
+    .option-btn.blink-red .label {
+      animation: blinkRedLabel 0.6s ease-in-out 2;
+    }
+
+    @keyframes blinkRedLabel {
+      0%, 100% {
+        background-color: #f1f5f9;
+        color: var(--accent);
+      }
+      50% {
+        background-color: var(--wrong);
+        color: white;
+      }
+    }
+
+    /* Pantalla Final */
+    .results-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 15px 0;
+    }
+
+    .stat-card {
+      background-color: #f8fafc;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+
+    .stat-card.correct-card { border-color: #a7f3d0; background-color: #ecfdf5; }
+    .stat-card.wrong-card { border-color: #fca5a5; background-color: #fef2f2; }
+
+    .stat-value {
+      font-size: 2.2rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .correct-card .stat-value { color: var(--correct); }
+    .wrong-card .stat-value { color: var(--wrong); }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    /* Sección Phrasal Verbs a reforzar */
+    .wrong-list-container {
+      margin-top: 10px;
+      max-height: 200px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .wrong-item {
+      background-color: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
+    }
+
+    .wrong-item-verb {
+      font-weight: 700;
+      color: #dc2626;
+    }
+
+    .wrong-item-meaning {
+      color: var(--text-secondary);
+      font-weight: 500;
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- 1. PANTALLA INICIAL -->
+    <div id="start-screen" class="screen active">
+      <h1>Essential Vocabulary!</h1>
+      <p class="subtitle">✨ Aprende y pon a prueba tu vocabulario en inglés ✨</p>
+      
+      <div class="selector-group">
+        <label style="font-size: 0.9rem; color: var(--text-secondary); font-weight: 500;">¿Cuántas preguntas deseas responder?</label>
+        <div class="stepper">
+          <button id="btn-minus">-</button>
+          <span id="question-count">10</span>
+          <button id="btn-plus">+</button>
+        </div>
+      </div>
+
+      <button id="start-btn" class="btn-primary">¡Comenzar Juego!</button>
+    </div>
+
+    <!-- 2. PANTALLA DEL JUEGO -->
+    <div id="game-screen" class="screen">
+      <div class="game-header">
+        <span class="progress" id="progress-text">Pregunta 1 de 10</span>
+        <div class="timer-badge">⏱️ <span id="timer-text">30s</span></div>
+        <button id="finish-btn" class="btn-danger">Finalizar</button>
+      </div>
+
+      <div class="word-box">
+        <div class="phrasal-verb" id="phrasal-verb-display">Approach</div>
+      </div>
+
+      <div class="options-list" id="options-container">
+        <!-- Las opciones a, b, c se generarán dinámicamente -->
+      </div>
+    </div>
+
+    <!-- 3. PANTALLA DE RESULTADOS -->
+    <div id="end-screen" class="screen">
+      <h1>¡Juego Terminado!</h1>
+      <p class="subtitle" id="final-status-text">Aquí tienes el resumen de tu partida:</p>
+
+      <div class="results-grid">
+        <div class="stat-card correct-card">
+          <div class="stat-value" id="correct-count">0</div>
+          <div class="stat-label">Correctas</div>
+        </div>
+        <div class="stat-card wrong-card">
+          <div class="stat-value" id="wrong-count">0</div>
+          <div class="stat-label">Incorrectas</div>
+        </div>
+      </div>
+
+      <!-- Sección dinámicamente mostrada si existen errores -->
+      <div id="review-section" style="display: none;">
+        <h3 style="font-size: 1.1rem; color: var(--text); font-weight: 700; margin-bottom: 8px;">Vocabulary to reinforce:</h3>
+        <div class="wrong-list-container" id="wrong-list"></div>
+      </div>
+
+      <button id="restart-btn" class="btn-primary">Jugar de nuevo</button>
+    </div>
+  </div>
+
+  <script>
+    // Base de datos actualizada con las 65 palabras del documento PDF
+    const database = [
+      { verb: "Approach", meaning: "Enfoque, aproximación" },
+      { verb: "Outcome", meaning: "Resultado" },
+      { verb: "Insight", meaning: "Percepción, visión profunda, idea clave" },
+      { verb: "Feedback", meaning: "Retroalimentación, comentarios" },
+      { verb: "Deadline", meaning: "Fecha límite" },
+      { verb: "Framework", meaning: "Marco de trabajo, estructura" },
+      { verb: "Takeaway", meaning: "Conclusión principal, punto clave" },
+      { verb: "Overview", meaning: "Visión general, resumen" },
+      { verb: "Task", meaning: "Tarea" },
+      { verb: "Shift", meaning: "Turno de trabajo, cambio" },
+      { verb: "Schedule", meaning: "Horario, cronograma" },
+      { verb: "Mindset", meaning: "Mentalidad, actitud" },
+      { verb: "Stance", meaning: "Postura, posición" },
+      { verb: "Claim", meaning: "Reclamo" },
+      { verb: "Backlash", meaning: "Reacción negativa, respuesta violenta" },
+      { verb: "Argument", meaning: "Argumento, discusión" },
+      { verb: "Hustle", meaning: "Ajetreo, esfuerzo constante" },
+      { verb: "Mess", meaning: "Desorden, lío" },
+      { verb: "Struggles", meaning: "Luchas, dificultades" },
+      { verb: "Focus", meaning: "Enfoque, concentración" },
+      { verb: "Trend", meaning: "Tendencia" },
+      { verb: "Crowd", meaning: "Multitud, gente" },
+      { verb: "Bond", meaning: "Vínculo, lazo" },
+      { verb: "Role model", meaning: "Modelo a seguir, ejemplo" },
+      { verb: "Impact", meaning: "Impacto, efecto" },
+      { verb: "Consequence", meaning: "Consecuencia" },
+      { verb: "Risk", meaning: "Riesgo" },
+      { verb: "Failure", meaning: "Fallo, fracaso" },
+      { verb: "However", meaning: "Sin embargo, no obstante" },
+      { verb: "Therefore", meaning: "Por lo tanto, por consiguiente" },
+      { verb: "Otherwise", meaning: "De lo contrario, si no" },
+      { verb: "Overall", meaning: "En general, a fin de cuentas" },
+      { verb: "Beyond", meaning: "Más allá de" },
+      { verb: "Within", meaning: "Dentro de, en el plazo de" },
+      { verb: "Throughout", meaning: "A lo largo de, por todo" },
+      { verb: "Among", meaning: "Entre (varios)" },
+      { verb: "Mostly", meaning: "En su mayoría, casi siempre" },
+      { verb: "Lately", meaning: "Últimamente" },
+      { verb: "Probably", meaning: "Probablemente" },
+      { verb: "Across", meaning: "A través de, al otro lado de" },
+      { verb: "Towards", meaning: "Hacia" },
+      { verb: "Onto", meaning: "Sobre, hacia dentro de" },
+      { verb: "Into", meaning: "En, dentro de" },
+      { verb: "Out of", meaning: "Fuera de, de entre" },
+      { verb: "In addition to", meaning: "Además de" },
+      { verb: "Mainly", meaning: "Principalmente" },
+      { verb: "Apparently", meaning: "Al parecer, por lo visto" },
+      { verb: "Reliable", meaning: "Confiable, de fiar" },
+      { verb: "Eager", meaning: "Entusiasmado, ansioso (en buen sentido)" },
+      { verb: "Thoughtful", meaning: "Considerado, detallista, reflexivo" },
+      { verb: "Careless", meaning: "Descuidado, imprudente" },
+      { verb: "Consistent", meaning: "Constante, coherente" },
+      { verb: "Overwhelmed", meaning: "Abrumado, sobrecargado" },
+      { verb: "Hesitant", meaning: "Indeciso, dudoso" },
+      { verb: "Flexible", meaning: "Flexible, adaptable" },
+      { verb: "Efficient", meaning: "Eficiente" },
+      { verb: "Overwhelming", meaning: "Abrumador" },
+      { verb: "Risky", meaning: "Arriesgado" },
+      { verb: "Troublesome", meaning: "Problemático, molesto" },
+      { verb: "Temporary", meaning: "Temporal, provisorio" },
+      { verb: "Logical", meaning: "Lógico" },
+      { verb: "Illogical", meaning: "Ilógico" },
+      { verb: "Objective", meaning: "Objetivo" },
+      { verb: "Grateful", meaning: "Agradecido" },
+      { verb: "Tiny", meaning: "Diminuto" }
+    ];
+
+    // Variables de estado del juego
+    let targetQuestionCount = 10;
+    let selectedQuestions = [];
+    let wrongQuestions = [];
+    let currentIndex = 0;
+    let correctCount = 0;
+    let wrongCount = 0;
+    let isAnsweringAllowed = true;
+    let timerInterval = null;
+    let timeLeft = 30;
+
+    // Elementos del DOM
+    const startScreen = document.getElementById('start-screen');
+    const gameScreen = document.getElementById('game-screen');
+    const endScreen = document.getElementById('end-screen');
+
+    const questionCountDisplay = document.getElementById('question-count');
+    const btnMinus = document.getElementById('btn-minus');
+    const btnPlus = document.getElementById('btn-plus');
+    const startBtn = document.getElementById('start-btn');
+    const finishBtn = document.getElementById('finish-btn');
+    const restartBtn = document.getElementById('restart-btn');
+
+    const progressText = document.getElementById('progress-text');
+    const timerText = document.getElementById('timer-text');
+    const verbDisplay = document.getElementById('phrasal-verb-display');
+    const optionsContainer = document.getElementById('options-container');
+
+    const correctCountDisplay = document.getElementById('correct-count');
+    const wrongCountDisplay = document.getElementById('wrong-count');
+    const reviewSection = document.getElementById('review-section');
+    const wrongList = document.getElementById('wrong-list');
+
+    // Control de la cantidad de preguntas (De 5 en 5, entre 5 y 100)
+    btnMinus.addEventListener('click', () => {
+      if (targetQuestionCount > 5) {
+        targetQuestionCount -= 5;
+        questionCountDisplay.textContent = targetQuestionCount;
+      }
+    });
+
+    btnPlus.addEventListener('click', () => {
+      if (targetQuestionCount < 100) {
+        targetQuestionCount += 5;
+        questionCountDisplay.textContent = targetQuestionCount;
+      }
+    });
+
+    // Iniciar Juego
+    startBtn.addEventListener('click', startGame);
+    finishBtn.addEventListener('click', endGame);
+    restartBtn.addEventListener('click', resetToStart);
+
+    function startGame() {
+      currentIndex = 0;
+      correctCount = 0;
+      wrongCount = 0;
+      wrongQuestions = [];
+
+      // Seleccionar preguntas aleatorias de la base de datos
+      const shuffled = [...database].sort(() => 0.5 - Math.random());
+      selectedQuestions = shuffled.slice(0, targetQuestionCount);
+
+      startScreen.classList.remove('active');
+      gameScreen.classList.add('active');
+
+      renderQuestion();
+    }
+
+    function startTimer() {
+      clearInterval(timerInterval);
+      timeLeft = 15;
+      timerText.textContent = `${timeLeft}s`;
+
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        timerText.textContent = `${timeLeft}s`;
+
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          handleTimeout();
+        }
+      }, 1000);
+    }
+
+    function renderQuestion() {
+      isAnsweringAllowed = true;
+      const currentQ = selectedQuestions[currentIndex];
+
+      progressText.textContent = `Pregunta ${currentIndex + 1} de ${selectedQuestions.length}`;
+      verbDisplay.textContent = currentQ.verb;
+      optionsContainer.innerHTML = '';
+
+      // Generar 2 distractoras únicas
+      const distractors = database
+        .filter(item => item.verb !== currentQ.verb)
+        .sort(() => 0.5 - Math.random())
+        .slice(0, 2);
+
+      // Crear las 3 opciones (A, B, C) y desordenarlas
+      const optionsData = [
+        { text: currentQ.meaning, isCorrect: true },
+        { text: distractors[0].meaning, isCorrect: false },
+        { text: distractors[1].meaning, isCorrect: false }
+      ].sort(() => 0.5 - Math.random());
+
+      const labels = ['a', 'b', 'c'];
+
+      optionsData.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.classList.add('option-btn');
+        btn.dataset.isCorrect = opt.isCorrect;
+
+        btn.innerHTML = `
+          <span class="label">${labels[idx]}</span>
+          <span>${opt.text}</span>
+        `;
+
+        btn.addEventListener('click', () => handleAnswer(btn, opt.isCorrect));
+        optionsContainer.appendChild(btn);
+      });
+
+      startTimer();
+    }
+
+    function handleAnswer(selectedBtn, isCorrect) {
+      if (!isAnsweringAllowed) return;
+      isAnsweringAllowed = false;
+      clearInterval(timerInterval);
+
+      const currentQ = selectedQuestions[currentIndex];
+      const buttons = optionsContainer.querySelectorAll('.option-btn');
+
+      if (isCorrect) {
+        selectedBtn.classList.add('correct');
+        correctCount++;
+      } else {
+        selectedBtn.classList.add('wrong');
+        wrongCount++;
+        wrongQuestions.push(currentQ);
+        // Iluminar en verde la respuesta correcta si se respondió mal
+        buttons.forEach(btn => {
+          if (btn.dataset.isCorrect === 'true') {
+            btn.classList.add('correct');
+          }
+        });
+      }
+
+      // Deshabilitar todos los botones durante la transición
+      buttons.forEach(btn => btn.disabled = true);
+
+      // Siguiente pregunta después de 1.2 segundos
+      setTimeout(() => {
+        currentIndex++;
+        if (currentIndex < selectedQuestions.length) {
+          renderQuestion();
+        } else {
+          endGame();
+        }
+      }, 1200);
+    }
+
+    function handleTimeout() {
+      if (!isAnsweringAllowed) return;
+      isAnsweringAllowed = false;
+
+      const currentQ = selectedQuestions[currentIndex];
+      wrongCount++;
+      wrongQuestions.push(currentQ);
+
+      const buttons = optionsContainer.querySelectorAll('.option-btn');
+
+      // Deshabilitar todos los botones y hacer parpadear en rojo ÚNICAMENTE la respuesta correcta
+      buttons.forEach(btn => {
+        btn.disabled = true;
+        if (btn.dataset.isCorrect === 'true') {
+          btn.classList.add('blink-red');
+        }
+      });
+
+      setTimeout(() => {
+        currentIndex++;
+        if (currentIndex < selectedQuestions.length) {
+          renderQuestion();
+        } else {
+          endGame();
+        }
+      }, 1200);
+    }
+
+    function endGame() {
+      clearInterval(timerInterval);
+      gameScreen.classList.remove('active');
+      endScreen.classList.add('active');
+
+      correctCountDisplay.textContent = correctCount;
+      wrongCountDisplay.textContent = wrongCount;
+
+      // Desplegar lista de Phrasal Verbs a reforzar si hubo fallos
+      if (wrongQuestions.length > 0) {
+        reviewSection.style.display = 'block';
+        wrongList.innerHTML = wrongQuestions.map(item => `
+          <div class="wrong-item">
+            <span class="wrong-item-verb">${item.verb}</span>
+            <span class="wrong-item-meaning">${item.meaning}</span>
+          </div>
+        `).join('');
+      } else {
+        reviewSection.style.display = 'none';
+        wrongList.innerHTML = '';
+      }
+    }
+
+    function resetToStart() {
+      clearInterval(timerInterval);
+      endScreen.classList.remove('active');
+      startScreen.classList.add('active');
+    }
+  </script>
+
+  <script>
+  // Bloque para insertar automáticamente el nombre del juego al finalizar
+  document.addEventListener("DOMContentLoaded", () => {
+    const endScreen = document.getElementById("end-screen");
+    const title = endScreen ? endScreen.querySelector("h1") : null;
+
+    if (title) {
+      const gameBadge = document.createElement("span");
+      gameBadge.textContent = "Essential Vocabulary!"; // Nombre actualizado del juego
+      
+      // Estilos integrados directamente
+      Object.assign(gameBadge.style, {
+        display: "inline-block",
+        alignSelf: "center",
+        backgroundColor: "var(--tag-bg, #d1fae5)",
+        color: "var(--tag-text, #047857)",
+        fontWeight: "700",
+        fontSize: "0.85rem",
+        padding: "4px 12px",
+        borderRadius: "20px",
+        textTransform: "uppercase",
+        letterSpacing: "0.5px",
+        marginTop: "8px",
+        marginBottom: "12px"
+      });
+
+      title.insertAdjacentElement("afterend", gameBadge);
+    }
+  });
+</script>
+
+<!-- Librería para tomar la captura de pantalla -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const endScreen = document.getElementById("end-screen");
+    const restartBtn = document.getElementById("restart-btn");
+
+    if (endScreen && restartBtn) {
+      // 1. Crear el botón de compartir / guardar
+      const shareBtn = document.createElement("button");
+      shareBtn.textContent = "📸 Guardar / Compartir";
+      shareBtn.className = "btn-primary";
+      
+      Object.assign(shareBtn.style, {
+        backgroundColor: "#2563eb",
+        marginTop: "10px"
+      });
+
+      restartBtn.parentNode.insertBefore(shareBtn, restartBtn);
+
+      // Detectar si es dispositivo móvil
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+      // 2. Lógica de captura limpia
+      shareBtn.addEventListener("click", async () => {
+        // Ocultar botones temporalmente para que la imagen salga limpia
+        shareBtn.style.display = "none";
+        restartBtn.style.display = "none";
+
+        try {
+          // Captura limpia del contenedor
+          const canvas = await html2canvas(document.querySelector(".container"), {
+            scale: 2,
+            backgroundColor: "#ffffff",
+            useCORS: true
+          });
+
+          // Restaurar los botones en pantalla de inmediato
+          shareBtn.style.display = "block";
+          restartBtn.style.display = "block";
+
+          // Caso 1: Celular con opción nativa de compartir
+          if (isMobile && navigator.share && navigator.canShare) {
+            canvas.toBlob(async (blob) => {
+              if (!blob) throw new Error("No se pudo generar el blob");
+              const file = new File([blob], "mi-resultado.png", { type: "image/png" });
+
+              if (navigator.canShare({ files: [file] })) {
+                await navigator.share({
+                  title: "¡Mi resultado!",
+                  text: "¡Mira cómo me fue en el juego!",
+                  files: [file]
+                });
+                return;
+              }
+              downloadImage(canvas);
+            }, "image/png");
+          } else {
+            // Caso 2: Laptop / PC (Descarga directa)
+            downloadImage(canvas);
+          }
+        } catch (err) {
+          // Asegurar que los botones vuelvan a verse si ocurre un error
+          shareBtn.style.display = "block";
+          restartBtn.style.display = "block";
+          console.error("Error al procesar captura:", err);
+          alert("Ocurrió un error al generar la imagen.");
+        }
+      });
+
+      // Función para descargar la imagen en laptops
+      function downloadImage(canvas) {
+        const imageURI = canvas.toDataURL("image/png");
+        const link = document.createElement("a");
+        link.download = "mi-resultado.png";
+        link.href = imageURI;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    }
+  });
+</script>
+</body>
+</html>
